@@ -1,11 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner"; // Import toast from sonner
 
 export default function DashboardPage() {
   const router = useRouter();
+
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -32,8 +34,16 @@ export default function DashboardPage() {
         {},
         { withCredentials: true }
       );
+
+      toast.success("Logged Out", {
+        description: "You have been successfully logged out.",
+      });
+
       router.push("/login");
     } catch (error) {
+      toast.error("Logout Failed", {
+        description: "An error occurred while logging out.",
+      });
       console.error("Logout failed", error);
     }
   };
