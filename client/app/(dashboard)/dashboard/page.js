@@ -74,6 +74,16 @@ export default function DashboardPage() {
     fetchData();
   }, [router]);
 
+  const handleDelete = (deletedId) => {
+    setProducts(products.filter((p) => p._id !== deletedId));
+  };
+
+  const handlePurchase = (updatedProduct) => {
+    setProducts(
+      products.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
+    );
+  };
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -275,7 +285,12 @@ export default function DashboardPage() {
       </nav>
       <div>
         {" "}
-        <ProductList products={products} />
+        <ProductList
+          products={products}
+          user={user}
+          onDelete={handleDelete}
+          onPurchase={handlePurchase}
+        />
       </div>
     </div>
   );

@@ -50,4 +50,59 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Delete Products
+
+// Delete Product (Seller only)
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (user.role !== "seller" || product.seller.toString() !== req.userId) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Purchase Product (Buyer only)
+router.post("/:id/purchase", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.role !== "buyer") {
+      return res
+        .status(403)
+        .json({ message: "Only buyers can purchase products" });
+    }
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.quantity < 1) {
+      return res.status(400).json({ message: "Product out of stock" });
+    }
+
+    product.quantity -= 1;
+    await product.save();
+
+    res.status(200).json({
+      message: "Purchase successful",
+      updatedProduct: product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 module.exports = router;
