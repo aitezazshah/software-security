@@ -27,10 +27,11 @@ app.use(cookieParser());
 
 // Routes
 const authRoutes = require("./routes/auth");
-app.use("/api/auth", authRoutes);
-
 const productRoutes = require("./routes/products");
+const purchaseRoutes = require("./routes/purchases");
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/purchases", purchaseRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

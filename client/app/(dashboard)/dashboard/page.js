@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
   Dialog,
   DialogTrigger,
@@ -203,6 +204,12 @@ export default function DashboardPage() {
               </DialogContent>
             </Dialog>
           )}
+          {user?.role === "buyer" && (
+            <Link href="/purchase-history">
+              <Button>Purchase History</Button>
+            </Link>
+          )}
+
           {/* Contact Us Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

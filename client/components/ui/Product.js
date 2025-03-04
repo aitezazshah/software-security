@@ -1,6 +1,7 @@
 "use client";
 import { toast } from "sonner";
 import axios from "axios";
+import { Button } from "@/components/ui/button";
 
 export default function Product({ product, user, onDelete, onPurchase }) {
   const handleDelete = async () => {
@@ -63,7 +64,7 @@ export default function Product({ product, user, onDelete, onPurchase }) {
         )}
 
         {user?.role === "buyer" && (
-          <button
+          <Button
             onClick={handlePurchase}
             disabled={product.quantity < 1}
             className={`px-4 py-2 rounded ${
@@ -73,7 +74,7 @@ export default function Product({ product, user, onDelete, onPurchase }) {
             }`}
           >
             {product.quantity < 1 ? "Out of Stock" : "Buy Now"}
-          </button>
+          </Button>
         )}
       </div>
     </div>

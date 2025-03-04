@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const User = require("../models/User");
+const Purchase = require("../models/Purchase");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Create Product
@@ -74,7 +75,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// Purchase Product (Buyer only)
+// Modify purchase route
 router.post("/:id/purchase", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -85,20 +86,27 @@ router.post("/:id/purchase", authMiddleware, async (req, res) => {
     }
 
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    if (product.quantity < 1) {
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (product.quantity < 1)
       return res.status(400).json({ message: "Product out of stock" });
-    }
 
+    // Create purchase record
+    const purchase = new Purchase({
+      user: req.userId,
+      product: product._id,
+      quantity: 1, // Or get from request if variable quantity
+      totalPrice: product.price,
+    });
+
+    // Update product quantity
     product.quantity -= 1;
-    await product.save();
+
+    await Promise.all([product.save(), purchase.save()]);
 
     res.status(200).json({
       message: "Purchase successful",
       updatedProduct: product,
+      purchase,
     });
   } catch (error) {
     console.error(error);
