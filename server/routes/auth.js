@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const User = require("../models/User");
 const router = express.Router();
+const Contact = require("../models/Contact");
 
 router.use(cookieParser());
 
@@ -134,6 +135,76 @@ router.get("/me", authMiddleware, async (req, res) => {
     res.status(200).json({ user });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Change password and feedback
+
+router.post("/change-password", authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 8 characters long, include a number and an uppercase letter",
+      });
+    }
+
+    const user = await User.findById(req.userId); // Use req.userId instead of req.user.id
+    console.log("User Found", user);
+    console.log("User ID from Token:", req.userId);
+    console.log("Fetched User:", user);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.post("/contact", async (req, res) => {
+  const { fullName, phone, email, message } = req.body;
+
+  try {
+    if (!fullName || !email || !message || !phone) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    const contactEntry = new Contact({
+      fullName,
+      email,
+      message,
+      phone,
+      createdAt: new Date(),
+    });
+
+    await contactEntry.save();
+
+    res
+      .status(200)
+      .json({ message: "Your message has been sent successfully." });
+  } catch (error) {
+    console.error("Error submitting contact form:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
