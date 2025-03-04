@@ -22,9 +22,15 @@ app.get("/", (req, res) => {
 // Connect to MongoDB
 connectDB();
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 // Routes
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
+
+const productRoutes = require("./routes/products");
+app.use("/api/products", productRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

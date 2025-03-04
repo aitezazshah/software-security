@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import ProductList from "@/components/ui/ProductList";
+import ProductForm from "@/components/ui/productForm";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -25,6 +27,7 @@ export default function DashboardPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [products, setProducts] = useState([]);
 
   // Validation Errors
   const [errors, setErrors] = useState({});
@@ -45,6 +48,30 @@ export default function DashboardPage() {
     };
 
     fetchUser();
+  }, [router]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch user
+        const userResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          { withCredentials: true }
+        );
+        setUser(userResponse.data.user);
+
+        // Fetch products
+        const productsResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/products`
+        );
+        setProducts(productsResponse.data);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        // router.push("/login");
+      }
+    };
+
+    fetchData();
   }, [router]);
 
   const handleLogout = async () => {
@@ -84,6 +111,17 @@ export default function DashboardPage() {
       toast.error("Password Change Failed", {
         description: error.response?.data?.message || "Error occurred.",
       });
+    }
+  };
+
+  const handleProductCreated = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/products`
+      );
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Failed to refresh products", error);
     }
   };
 
@@ -142,6 +180,19 @@ export default function DashboardPage() {
           {user ? `Welcome, ${user.fullName}` : "Software Security"}
         </span>
         <div className="flex gap-2">
+          {user?.role === "seller" && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>Create Product</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Product</DialogTitle>
+                </DialogHeader>
+                <ProductForm onSuccess={handleProductCreated} />
+              </DialogContent>
+            </Dialog>
+          )}
           {/* Contact Us Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -222,7 +273,10 @@ export default function DashboardPage() {
           <Button onClick={handleLogout}>Logout</Button>
         </div>
       </nav>
-      <div>Dashboard</div>
+      <div>
+        {" "}
+        <ProductList products={products} />
+      </div>
     </div>
   );
 }
