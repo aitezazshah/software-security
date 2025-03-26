@@ -41,6 +41,20 @@ export default function ProductForm({ onSuccess }) {
       return;
     }
 
+    // Convert values and validate
+    const price = parseFloat(productPrice);
+    const quantity = parseInt(productQuantity);
+
+    if (price < 1) {
+      toast.error("Price must be at least 1");
+      return;
+    }
+
+    if (quantity < 1) {
+      toast.error("Quantity must be at least 1");
+      return;
+    }
+
     try {
       setIsLoading(true);
       await axios.post(
@@ -48,8 +62,8 @@ export default function ProductForm({ onSuccess }) {
         {
           name: productName,
           description: productDescription,
-          price: parseFloat(productPrice),
-          quantity: parseInt(productQuantity),
+          price,
+          quantity,
           image: productImage,
         },
         { withCredentials: true }
