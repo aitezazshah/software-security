@@ -54,18 +54,41 @@ export default function AuthForm({ type }) {
         userData,
         { withCredentials: true }
       );
+
       if (type === "login") {
         const user = response?.data?.user; // Assuming API returns user object
         console.log("Full Response:", response);
         console.log("User Object:", user);
-        if (user.role !== role) {
-          setError(`Invalid role selection`);
+
+        if (!user) {
+          setError("Invalid login credentials");
           return;
         }
+
+        if (user.disabled) {
+          setError("Your account is disabled. Please contact support.");
+          return;
+        }
+
+        if (user.role !== role) {
+          setError("Invalid role selection");
+          return;
+        }
+
+        // if (user.role === "seller" && !user.approved) {
+        //   setError(
+        //     "Your seller account is not yet approved. Please wait for admin approval."
+        //   );
+        //   return;
+        // }
       }
 
       if (response.status === 201 || response.status === 200) {
-        router.push("/dashboard");
+        if (type === "signup" && role === "seller") {
+          router.push("/login"); // Redirect sellers to login after signup
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       setError(error.response?.data?.message || "Authentication failed");
