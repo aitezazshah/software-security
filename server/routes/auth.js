@@ -78,6 +78,16 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
+    // Check if user is disabled
+    if (user.isDisabled) {
+      return res.status(403).json({ message: "Account disabled by admin" });
+    }
+
+    // Check if seller is not approved
+    if (user.role === "seller" && !user.isApproved) {
+      return res.status(403).json({ message: "Seller not approved" });
+    }
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });

@@ -8,10 +8,12 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: {
     type: String,
-    required: true,
-    enum: ["buyer", "seller"],
+    enum: ["buyer", "seller", "admin", "SuperAdmin"],
     default: "buyer",
   },
+  isApproved: { type: Boolean, default: false }, // For sellers
+  isDisabled: { type: Boolean, default: false }, // For admin control
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Hash password before saving the user
