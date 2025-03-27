@@ -110,7 +110,7 @@ export default function AdminPanel() {
 
   const deleteAdmin = async (id) => {
     try {
-      await axios.delete(
+      const { data } = await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/delete-admins/${id}`,
         {
           withCredentials: true,
@@ -119,8 +119,9 @@ export default function AdminPanel() {
       loadContacts();
       toast.success("Admin deleted successfully");
     } catch (error) {
-      console.error("Error deleting admin:", error);
-      toast.error("Failed to delete admin");
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete admin";
+      toast.error(errorMessage);
     }
   };
 
@@ -219,7 +220,7 @@ export default function AdminPanel() {
               <Package className="h-4 w-4" />
               Products
             </TabsTrigger>
-            <TabsTrigger value="contacts">
+            <TabsTrigger value="contacts" className="flex gap-2">
               <Mail className="h-4 w-4" /> Contacts
             </TabsTrigger>
             <TabsTrigger value="admins" className="flex gap-2">
@@ -258,6 +259,11 @@ export default function AdminPanel() {
                           <Button
                             variant="destructive"
                             size="sm"
+                            className={
+                              user.isDisabled
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-red-600 hover:bg-red-700"
+                            }
                             onClick={() =>
                               toggleUserStatus(user._id, !user.isDisabled)
                             }

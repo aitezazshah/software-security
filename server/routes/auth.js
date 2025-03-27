@@ -167,9 +167,6 @@ router.post("/change-password", authMiddleware, async (req, res) => {
     }
 
     const user = await User.findById(req.userId); // Use req.userId instead of req.user.id
-    console.log("User Found", user);
-    console.log("User ID from Token:", req.userId);
-    console.log("Fetched User:", user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

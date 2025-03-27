@@ -39,12 +39,11 @@ router.post("/admin-login", async (req, res) => {
 
     res.json({ message: "Admin logged in", user: admin });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: error.message });
   }
 });
 
-router.get("/contacts", async (req, res) => {
+router.get("/contacts", authMiddleware, async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
@@ -53,7 +52,7 @@ router.get("/contacts", async (req, res) => {
   }
 });
 
-router.get("/get-admin", async (req, res) => {
+router.get("/get-admin", authMiddleware, async (req, res) => {
   try {
     const admins = await User.find({
       role: { $in: ["admin", "SuperAdmin"] },
@@ -64,7 +63,7 @@ router.get("/get-admin", async (req, res) => {
   }
 });
 
-router.post("/create-admin", async (req, res) => {
+router.post("/create-admin", authMiddleware, async (req, res) => {
   const { fullName, email, password } = req.body;
 
   if (!email || !password || !fullName) {
@@ -77,11 +76,11 @@ router.post("/create-admin", async (req, res) => {
       return res.status(400).json({ error: "Admin already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
     const newAdmin = new User({
       fullName,
       email,
-      password: hashedPassword,
+      password: password,
       role: "admin",
     });
     await newAdmin.save();
@@ -91,21 +90,28 @@ router.post("/create-admin", async (req, res) => {
       .json({ message: "Admin added successfully", admin: newAdmin });
   } catch (err) {
     res.status(500).json({ error: "Failed to create admin" });
-    console.error(err);
   }
 });
 
 // Delete an admin (Super Admin cannot be deleted)
-router.delete("/delete-admins/:id", async (req, res) => {
-  const { id } = req.params;
+router.delete("/delete-admins/:id", authMiddleware, async (req, res) => {
+  const { id } = req.params; // ID of the admin to be deleted
+  const requestingAdminId = req.userId; // ID of the admin making the request
 
   try {
-    const admin = await User.findById(id);
-    if (!admin) {
+    // Prevent self-deletion
+    if (requestingAdminId === id) {
+      return res.status(403).json({ error: "You cannot delete yourself" });
+    }
+
+    // Find the admin to be deleted
+    const adminToDelete = await User.findById(id);
+    if (!adminToDelete) {
       return res.status(404).json({ error: "Admin not found" });
     }
 
-    if (admin.role === "SuperAdmin") {
+    // Prevent Super Admin deletion
+    if (adminToDelete.role === "SuperAdmin") {
       return res.status(403).json({ error: "Super Admin cannot be deleted" });
     }
 
@@ -153,16 +159,16 @@ router.put("/sellers/:id/approve", authMiddleware, async (req, res) => {
 });
 
 // Create New Admin
-router.post("/create-admin", authMiddleware, async (req, res) => {
-  if (req.user._id.toString() === req.body.userId) {
-    return res.status(400).json({ message: "Cannot modify yourself" });
-  }
+// router.post("/create-admin", authMiddleware, async (req, res) => {
+//   if (req.user._id.toString() === req.body.userId) {
+//     return res.status(400).json({ message: "Cannot modify yourself" });
+//   }
 
-  const newAdmin = await User.findByIdAndUpdate(req.body.userId, {
-    role: "admin",
-  });
-  res.json({ message: "Admin created", user: newAdmin });
-});
+//   const newAdmin = await User.findByIdAndUpdate(req.body.userId, {
+//     role: "admin",
+//   });
+//   res.json({ message: "Admin created", user: newAdmin });
+// });
 
 // Product Management
 router.get("/products", authMiddleware, async (req, res) => {
