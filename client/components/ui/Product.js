@@ -72,7 +72,7 @@ export default function Product({ product, user, onDelete, onPurchase }) {
             className={`px-4 py-2 rounded ${
               product.quantity < 1
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-black hover:bg-gray-600 text-white"
             }`}
           >
             {product.quantity < 1 ? "Out of Stock" : "Buy Now"}
