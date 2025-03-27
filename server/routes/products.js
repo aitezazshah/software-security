@@ -85,26 +85,30 @@ router.post("/:id/purchase", authMiddleware, async (req, res) => {
         .json({ message: "Only buyers can purchase products" });
     }
 
+    const { quantity } = req.body; // Get requested quantity
     const product = await Product.findById(req.params.id);
+
     if (!product) return res.status(404).json({ message: "Product not found" });
-    if (product.quantity < 1)
-      return res.status(400).json({ message: "Product out of stock" });
+
+    if (quantity < 1 || quantity > product.quantity) {
+      return res.status(400).json({ message: "Invalid purchase quantity" });
+    }
 
     // Create purchase record
     const purchase = new Purchase({
       user: req.userId,
       product: product._id,
-      quantity: 1, // Or get from request if variable quantity
-      totalPrice: product.price,
+      quantity,
+      totalPrice: product.price * quantity,
     });
 
     // Update product quantity
-    product.quantity -= 1;
+    product.quantity -= quantity;
 
     await Promise.all([product.save(), purchase.save()]);
 
     res.status(200).json({
-      message: "Purchase successful",
+      message: `Successfully purchased ${quantity} items`,
       updatedProduct: product,
       purchase,
     });

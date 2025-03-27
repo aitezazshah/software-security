@@ -1,16 +1,17 @@
 "use client";
 import { toast } from "sonner";
 import axios from "axios";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function Product({ product, user, onDelete, onPurchase }) {
+  const [quantity, setQuantity] = useState(1); // Default to 1
+
   const handleDelete = async () => {
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       onDelete(product._id);
       toast.success("Product deleted successfully");
@@ -20,14 +21,20 @@ export default function Product({ product, user, onDelete, onPurchase }) {
   };
 
   const handlePurchase = async () => {
+    if (quantity < 1 || quantity > product.quantity) {
+      toast.error("Invalid quantity selected");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}/purchase`,
-        {},
+        { quantity },
         { withCredentials: true }
       );
+
       onPurchase(response.data.updatedProduct);
-      toast.success("Purchase successful!");
+      toast.success(`Purchase successful! You bought ${quantity} items`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Purchase failed");
     }
@@ -49,21 +56,16 @@ export default function Product({ product, user, onDelete, onPurchase }) {
         <span className="text-gray-500">Qty: {product.quantity}</span>
       </div>
 
-      {/* <div className="mt-2 text-sm text-gray-500">
-        Sold by: {product.seller?.fullName || "Unknown Seller"}
-      </div> */}
-
-      <div className="mt-4 flex gap-2">
-        {user?.role === "seller" && product.seller?._id === user?._id && (
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Delete
-          </button>
-        )}
-
-        {user?.role === "buyer" && (
+      {user?.role === "buyer" && (
+        <div className="mt-2">
+          <input
+            type="number"
+            value={quantity}
+            min="1"
+            max={product.quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            className="border px-2 py-1 rounded w-16 mr-2"
+          />
           <Button
             onClick={handlePurchase}
             disabled={product.quantity < 1}
@@ -75,8 +77,17 @@ export default function Product({ product, user, onDelete, onPurchase }) {
           >
             {product.quantity < 1 ? "Out of Stock" : "Buy Now"}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
+
+      {user?.role === "seller" && product.seller?._id === user?._id && (
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mt-2"
+        >
+          Delete
+        </button>
+      )}
     </div>
   );
 }

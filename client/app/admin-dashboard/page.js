@@ -36,7 +36,11 @@ export default function AdminPanel() {
   const [products, setProducts] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
-  const [newAdmin, setNewAdmin] = useState({ email: "", password: "" });
+  const [newAdmin, setNewAdmin] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+  });
 
   const router = useRouter();
 
