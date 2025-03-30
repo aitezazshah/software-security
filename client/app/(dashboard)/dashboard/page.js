@@ -43,7 +43,7 @@ export default function DashboardPage() {
         );
         setUser(response.data.user);
       } catch (error) {
-        console.error("Failed to fetch user", error);
+        toast.error("Login to access dashboard");
         router.push("/login");
       }
     };
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         );
         setProducts(productsResponse.data);
       } catch (error) {
-        console.error("Failed to fetch data", error);
+        toast.error("Login to access dashboard");
         // router.push("/login");
       }
     };
