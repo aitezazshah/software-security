@@ -185,7 +185,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4" suppressHydrationWarning={true}>
       <nav className="flex justify-between p-2 border-b border-gray-200">
         <span className="text-2xl font-bold text-gray-800">
           {user ? `Welcome, ${user.fullName}` : "Software Security"}
