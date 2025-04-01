@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,11 @@ export default function DashboardPage() {
 
   const handleDelete = (deletedId) => {
     setProducts(products.filter((p) => p._id !== deletedId));
+  };
+
+  const handleInputChange = (setter) => (e) => {
+    const cleanValue = DOMPurify.sanitize(e.target.value);
+    setter(cleanValue);
   };
 
   const handlePurchase = (updatedProduct) => {
@@ -223,7 +229,7 @@ export default function DashboardPage() {
               <Input
                 placeholder="Full Name"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={handleInputChange(setFullName)}
               />
               {errors.fullName && (
                 <span className="text-red-500 text-sm">{errors.fullName}</span>
@@ -252,7 +258,7 @@ export default function DashboardPage() {
               <Textarea
                 placeholder="Your Message"
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={handleInputChange(setMessage)}
               />
               {errors.message && (
                 <span className="text-red-500 text-sm">{errors.message}</span>
