@@ -18,8 +18,15 @@ export default function AuthForm({ type }) {
 
   const isValidPassword = (password) => {
     return (
-      password.length >= 8 && /\d/.test(password) && /[A-Z]/.test(password)
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /\d/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
     );
+  };
+
+  const isValidEmail = (email) => {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
   };
 
   const handleSubmit = async (e) => {
@@ -32,10 +39,15 @@ export default function AuthForm({ type }) {
       setLoading(false);
       return;
     }
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
 
     if (type === "signup" && !isValidPassword(password)) {
       setError(
-        "Password must be at least 8 characters long, include a number and an uppercase letter"
+        "Password must be at least 8 characters long, include a number, uppercase letter and an special character"
       );
       setLoading(false);
       return;
@@ -74,13 +86,6 @@ export default function AuthForm({ type }) {
           setError("Invalid role selection");
           return;
         }
-
-        // if (user.role === "seller" && !user.approved) {
-        //   setError(
-        //     "Your seller account is not yet approved. Please wait for admin approval."
-        //   );
-        //   return;
-        // }
       }
 
       if (response.status === 201 || response.status === 200) {

@@ -55,6 +55,11 @@ export default function ProductForm({ onSuccess }) {
       return;
     }
 
+    if (!productImage) {
+      toast.error("Please upload an image");
+      return;
+    }
+
     try {
       setIsLoading(true);
       await axios.post(

@@ -44,6 +44,19 @@ export default function AdminPanel() {
 
   const router = useRouter();
 
+  const isValidEmail = (email) => {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  };
+
+  const isValidPassword = (password) => {
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /\d/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    );
+  };
+
   useEffect(() => {
     if (section !== "admins") loadData(section);
   }, [section]);
@@ -58,7 +71,8 @@ export default function AdminPanel() {
       if (type === "sellers") setSellers(data);
       if (type === "products") setProducts(data);
     } catch (error) {
-      console.error("Error loading data:", error);
+      toast.error("Login to access Admin Dashboard");
+      router.push("/admin-login");
     }
   };
 
@@ -95,6 +109,18 @@ export default function AdminPanel() {
 
   const createAdmin = async () => {
     if (!newAdmin.email || !newAdmin.password || !newAdmin.fullName) return;
+
+    if (!isValidEmail(newAdmin.email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    if (!isValidPassword(newAdmin.password)) {
+      toast.error(
+        "Password must be at least 8 characters long, include one uppercase letter, one number, and one special character."
+      );
+      return;
+    }
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/create-admin`,

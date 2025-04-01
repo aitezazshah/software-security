@@ -25,7 +25,7 @@ router.post("/signup", async (req, res) => {
     if (!isValidPassword(password)) {
       return res.status(400).json({
         message:
-          "Password must be at least 8 characters long, include a number and an uppercase letter",
+          "Password must be at least 8 characters long, include a number,uppercase letter and an special character",
       });
     }
 
@@ -162,11 +162,11 @@ router.post("/change-password", authMiddleware, async (req, res) => {
     if (!isValidPassword(newPassword)) {
       return res.status(400).json({
         message:
-          "Password must be at least 8 characters long, include a number and an uppercase letter",
+          "Password must be at least 8 characters long, include a number, uppercase letter and an special character",
       });
     }
 
-    const user = await User.findById(req.userId); // Use req.userId instead of req.user.id
+    const user = await User.findById(req.userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

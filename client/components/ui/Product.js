@@ -45,7 +45,7 @@ export default function Product({ product, user, onDelete, onPurchase }) {
       <img
         src={product.image}
         alt={product.name}
-        className="w-full h-48 object-cover mb-4 rounded"
+        className="w-full h-80 object-cover mb-4 rounded"
       />
 
       <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
